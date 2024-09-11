@@ -17,18 +17,17 @@ def get_photo_info(item):
 
 
 class VkClient:
-    def __init__(self, token, userid, version='5.199'):
+    def __init__(self, token, version='5.199'):
         self.token = token
         self.version = version
-        self.id = userid
         self.base_params = {'access_token': token, 'v': self.version}
         self.base_url = "https://api.vk.com/method"
 
     def _url_constructor(self, path):
         return self.base_url + path
 
-    def photos_get(self, album_id):
-        response = requests.get(self._url_constructor("/photos.get"), {**self.base_params, 'owner_id': self.id,
+    def photos_get(self, user_id, album_id):
+        response = requests.get(self._url_constructor("/photos.get"), {**self.base_params, 'owner_id': user_id,
                                                                        'album_id': album_id, 'extended': True})
         return response
 
@@ -68,10 +67,10 @@ if __name__ == '__main__':
     if new_yandex_token:
         settings.YANDEX_TOKEN = new_yandex_token
 
-    vk_client = VkClient(settings.VK_TOKEN, vk_user_id)
+    vk_client = VkClient(settings.VK_TOKEN)
     y_client = YDiscClient(settings.YANDEX_TOKEN)
 
-    profile_photos = vk_client.photos_get("profile").json()["response"]["items"]
+    profile_photos = vk_client.photos_get(vk_user_id, "profile").json()["response"]["items"]
 
     # list of all photos (includes ones we need date for)
     photos_data = [get_photo_info(i) for i in profile_photos]
